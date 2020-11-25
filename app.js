@@ -71,13 +71,13 @@ function makeMessage(agent, message){
 
 // handle bot request
 async function handleBot(ctx) {
-  let { name } = ctx.params;
+  let { agent } = ctx.params;
 
-  if (!name)
-    name = ctx.query.name;
+  if (!agent)
+    agent = ctx.query.agent;
 
-  if (!name)
-    name = 'anonymous';
+  if (!agent)
+    agent = 'anonymous';
 
   let { message, secret } = ctx.query;
   if (!secret)
@@ -90,13 +90,13 @@ async function handleBot(ctx) {
     return;
   }
 
-  io.to('admin').emit('message', makeMessage(name, message));
+  io.to('admin').emit('message', makeMessage(agent, message));
   ctx.body = 'ok';
 }
 
 // routing
 router.get('/emit', handleBot);
-router.get('/emit/:name', handleBot);
+router.get('/emit/:agent', handleBot);
 
 router.use(async (ctx, next) => {
   if (makeAuth(ctx.request.headers['authorization'])){
@@ -139,4 +139,5 @@ io.on('connection', function(socket){
 });
 
 // listen 
-server.listen(3000, () => console.log(`Server is running at port ${3030}`));
+const port = process.env.PORT || 3000;
+server.listen(port, () => console.log(`Server is running at port ${port}`));

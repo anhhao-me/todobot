@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todobot</title>
+  <style>
+    html, body {
+      background-color: black;
+      color: white;
+      font-family: monospace;
+    }
+
+    .entry .time, .entry .agent, .entry .message {
+      display: inline-block;
+      margin-right: .2em;
+    }
+
+    .entry .time:before, .entry .agent:before {
+      content: '[';
+    }
+
+    .entry .time:after, .entry .agent:after {
+      content: ']';
+    }
+
+    .entry .time {
+      color: palevioletred;
+    }
+
+    .entry .agent {
+      color: gold;
+    }
+
+    .entry .message {
+
+    }
+  </style>
+</head>
+<body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    function addRow(payload){
+      const newtag = document.createElement('div');
+      newtag.className = "entry";
+      newtag.innerHTML = `<div class="time">${payload.createdAt}</div><div class="agent">${payload.agent}</div><div class="message">${payload.message}</div>`;
+      document.body.insertBefore(newtag, document.body.firstChild)
+    }
+
+    const logRaw = decodeURIComponent("<%- encodeURIComponent(log) %>");
+    const lines = logRaw.split('\n').map(line => line.trim()).filter(i => i);
+    for (let line of lines){
+      try {
+        addRow(JSON.parse(line));
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    const socket = io();
+    socket.on('message', msg => {
+      try {
+        const payload = JSON.parse(msg);
+        addRow(payload);
+      } catch(err){
+        console.error(err);
+      } 
+    });
+  </script>
+</body>
+</html>
